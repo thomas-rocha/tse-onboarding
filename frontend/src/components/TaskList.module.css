@@ -1,0 +1,18 @@
+.outerContainer {
+  margin-top: 3rem;
+}
+
+.innerContainer {
+  display: flex;
+  flex-direction: column;
+  flex-grow: row;
+  width: 100%;
+}
+
+.title {
+  font: var(--font-heading);
+}
+
+.errorModalText {
+  color: var(--color-tse-navy-blue);
+}
