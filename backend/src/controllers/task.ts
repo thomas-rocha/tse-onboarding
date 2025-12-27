@@ -31,7 +31,7 @@ export const getTask: RequestHandler = async (req, res, next) => {
 
   try {
     // if the ID doesn't exist, then findById returns null
-    const task = await TaskModel.findById(id);
+    const task = await TaskModel.findById(id).populate("assignee");
 
     if (task === null) {
       throw createHttpError(404, "Task not found.");
@@ -71,9 +71,11 @@ export const createTask: RequestHandler = async (req, res, next) => {
       dateCreated: Date.now(),
     });
 
+    const populatedTask = await TaskModel.findById(task._id).populate("assignee");
+
     // 201 means a new resource has been created successfully
     // the newly created task is sent back to the user
-    res.status(201).json(task);
+    res.status(201).json(populatedTask);
   } catch (error) {
     next(error);
   }
@@ -111,13 +113,17 @@ export const updateTask: RequestHandler = async (req, res, next) => {
     if (_id !== reqid) {
       res.status(400);
     } else {
-      const result = await TaskModel.findByIdAndUpdate(reqid, {
-        _id,
-        title,
-        description,
-        isChecked: !isChecked,
-        dateCreated,
-      });
+      const result = await TaskModel.findByIdAndUpdate(
+        reqid,
+        {
+          _id,
+          title,
+          description,
+          isChecked: !isChecked,
+          dateCreated,
+        },
+        { new: true },
+      ).populate("assignee");
       if (result) {
         const updated = await TaskModel.findById(reqid);
         res.status(200).json(updated);
