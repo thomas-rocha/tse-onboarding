@@ -1,5 +1,6 @@
 import { Dialog } from "@tritonse/tse-constellation";
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { updateTask } from "src/api/tasks";
 import { CheckButton } from "src/components";
 import styles from "src/components/TaskItem.module.css";
@@ -28,6 +29,7 @@ export function TaskItem({ task: initialTask }: TaskItemProps) {
       })
       .catch(setErrorModalMessage);
   };
+  const link = `/task/${task._id}`;
 
   let wrapperClass = styles.item;
   if (task.isChecked) {
@@ -37,7 +39,9 @@ export function TaskItem({ task: initialTask }: TaskItemProps) {
     <div className={wrapperClass}>
       {<CheckButton checked={task.isChecked} onPress={handleToggleCheck} disabled={isLoading} />}
       <div className={styles.textContainer}>
-        <span className={styles.title}>{task.title}</span>
+        <Link to={link}>
+          <span className={styles.title}>{task.title}</span>
+        </Link>
         {task.description && <span className={styles.description}>{task.description}</span>}
       </div>
       <Dialog

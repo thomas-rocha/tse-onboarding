@@ -1,0 +1,47 @@
+.pageContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 24px;
+}
+
+.pageContent h2 {
+  margin: 0;
+}
+
+.title {
+  font: var(--font-heading);
+  flex-grow: 1;
+}
+
+.pageContent span {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  font: var(--font-body);
+}
+
+.pageContent span p {
+  margin: 0;
+}
+
+.description {
+  width: 100%;
+}
+
+.barHead {
+  padding-right: 1.5rem;
+  flex-grow: 0;
+  font-weight: bold;
+  width: auto;
+}
+
+.barContent {
+  flex-grow: 1;
+  width: auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
