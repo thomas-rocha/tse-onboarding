@@ -30,19 +30,14 @@ export const getTask: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    // if the ID doesn't exist, then findById returns null
-    const task = await TaskModel.findById(id);
+    const task = await TaskModel.findById(id).populate("assignee");
 
-    if (task === null) {
+    if (!task) {
       throw createHttpError(404, "Task not found.");
     }
 
-    // Set the status code (200) and body (the task object as JSON) of the response.
-    // Note that you don't need to return anything, but you can still use a return
-    // statement to exit the function early.
     res.status(200).json(task);
   } catch (error) {
-    // pass errors to the error handler
     next(error);
   }
 };
@@ -53,15 +48,14 @@ type CreateTaskBody = {
   title: string;
   description?: string;
   isChecked?: boolean;
+  assignee?: string;
 };
 
 export const createTask: RequestHandler = async (req, res, next) => {
-  // extract any errors that were found by the validator
   const errors = validationResult(req);
-  const { title, description, isChecked } = req.body as CreateTaskBody;
+  const { title, description, isChecked, assignee } = req.body as CreateTaskBody;
 
   try {
-    // if there are errors, then this function throws an exception
     validationErrorParser(errors);
 
     const task = await TaskModel.create({
@@ -69,11 +63,13 @@ export const createTask: RequestHandler = async (req, res, next) => {
       description,
       isChecked,
       dateCreated: Date.now(),
+      assignee,
     });
 
-    // 201 means a new resource has been created successfully
-    // the newly created task is sent back to the user
-    res.status(201).json(task);
+    // Populate the assignee before sending response
+    const populatedTask = await TaskModel.findById(task._id).populate("assignee");
+
+    res.status(201).json(populatedTask);
   } catch (error) {
     next(error);
   }
@@ -97,33 +93,31 @@ type UpdateTaskBody = {
   description: string;
   isChecked: boolean;
   dateCreated: string;
+  assignee?: string;
 };
 
 export const updateTask: RequestHandler = async (req, res, next) => {
-  // your code here
   const errors = validationResult(req);
-  const { _id, title, description, isChecked, dateCreated } = req.body as UpdateTaskBody;
+  const { _id, title, description, isChecked, dateCreated, assignee } = req.body as UpdateTaskBody;
   const reqid = req.params.id;
+
   try {
-    // your code here
     validationErrorParser(errors);
 
     if (_id !== reqid) {
-      res.status(400);
+      return res.status(400).json({ message: "ID mismatch" });
+    }
+
+    const result = await TaskModel.findByIdAndUpdate(
+      reqid,
+      { title, description, isChecked, dateCreated, assignee },
+      { new: true },
+    ).populate("assignee");
+
+    if (result) {
+      res.status(200).json(result);
     } else {
-      const result = await TaskModel.findByIdAndUpdate(reqid, {
-        _id,
-        title,
-        description,
-        isChecked: !isChecked,
-        dateCreated,
-      });
-      if (result) {
-        const updated = await TaskModel.findById(reqid);
-        res.status(200).json(updated);
-      } else {
-        res.status(404);
-      }
+      res.status(404).json({ message: "Task not found" });
     }
   } catch (error) {
     next(error);

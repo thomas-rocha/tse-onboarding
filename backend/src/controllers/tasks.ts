@@ -4,9 +4,8 @@ import type { RequestHandler } from "express";
 
 export const getAllTasks: RequestHandler = async (req, res, next) => {
   try {
-    // your code here
-    const result = await TaskModel.find().sort({ dateCreated: -1 });
-    res.status(200).json(result);
+    const tasks = await TaskModel.find().populate("assignee");
+    res.status(200).json(tasks);
   } catch (error) {
     next(error);
   }

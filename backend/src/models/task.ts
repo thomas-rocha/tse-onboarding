@@ -6,6 +6,7 @@ const taskSchema = new Schema({
   title: { type: String, required: true },
   description: { type: String },
   isChecked: { type: Boolean, default: false },
+  assignee: { type: Schema.Types.ObjectId, ref: "User", required: false },
   // Note that dateCreated has type Date, which is MongoDB's recommended format
   // for storing dates (as opposed to, say, strings or numbers--see
   // https://www.mongodb.com/developer/products/mongodb/bson-data-types-date/).
