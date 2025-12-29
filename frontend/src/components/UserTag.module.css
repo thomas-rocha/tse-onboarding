@@ -1,0 +1,24 @@
+.userTag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 12rem;
+  height: inherit;
+}
+
+.userTagImage {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.userTagName {
+  font: var(--font-body);
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
