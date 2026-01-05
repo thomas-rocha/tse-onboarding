@@ -1,6 +1,6 @@
 import { Dialog } from "@tritonse/tse-constellation";
 import { useState } from "react";
-import { createTask } from "src/api/tasks";
+import { createTask, updateTask } from "src/api/tasks";
 import { Button, TextField } from "src/components";
 import styles from "src/components/TaskForm.module.css";
 
@@ -43,6 +43,7 @@ export function TaskForm({ mode, task, onSubmit }: TaskFormProps) {
   const [description, setDescription] = useState<string>(task?.description || "");
   const [isLoading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<TaskFormErrors>({});
+  const [assignee, setAssignee] = useState<string>(task?.assignee ? task.assignee.name : "");
 
   // This state variable controls the error message that gets displayed to the user in the
   // Constellation `Dialog` component. If it's `null`, there's no error, so we don't display the Dialog.
@@ -57,28 +58,62 @@ export function TaskForm({ mode, task, onSubmit }: TaskFormProps) {
       return;
     }
     setLoading(true);
-    createTask({ title, description })
-      .then((result) => {
-        if (result.success) {
-          // clear the form
-          setTitle("");
-          setDescription("");
-          // only call onSubmit if it's NOT undefined
-          if (onSubmit) onSubmit(result.data);
-        } else {
-          // You should always clearly inform the user when something goes wrong.
-          // In this case, we're using the Constellation `Dialog` component to show a popup.
-          // For errors, you generally want to show some kind of error state or notification
-          // within your UI. If the problem is with the user's input, then use
-          // the error states of your smaller components (like the `TextField`s).
-          // If the problem is something we don't really control, such as network
-          // issues or an unexpected exception on the server side, then use a
-          // banner, modal, popup, or similar.
-          setErrorModalMessage(result.error);
-        }
-        setLoading(false);
+    if (mode === "create") {
+      createTask({
+        title,
+        description,
+        assignee,
       })
-      .catch(setErrorModalMessage);
+        .then((result) => {
+          if (result.success) {
+            // clear the form
+            setTitle("");
+            setDescription("");
+            // only call onSubmit if it's NOT undefined
+            if (onSubmit) onSubmit(result.data);
+          } else {
+            // You should always clearly inform the user when something goes wrong.
+            // In this case, we're using the Constellation `Dialog` component to show a popup.
+            // For errors, you generally want to show some kind of error state or notification
+            // within your UI. If the problem is with the user's input, then use
+            // the error states of your smaller components (like the `TextField`s).
+            // If the problem is something we don't really control, such as network
+            // issues or an unexpected exception on the server side, then use a
+            // banner, modal, popup, or similar.
+            setErrorModalMessage(result.error);
+          }
+          setLoading(false);
+        })
+        .catch(setErrorModalMessage);
+    } else {
+      updateTask({
+        title,
+        description,
+        _id: task._id,
+        isChecked: task.isChecked,
+        dateCreated: task.dateCreated,
+        assignee,
+      })
+        .then((result) => {
+          if (result.success) {
+            // clear the form
+            // only call onSubmit if it's NOT undefined
+            if (onSubmit) onSubmit(result.data);
+          } else {
+            // You should always clearly inform the user when something goes wrong.
+            // In this case, we're using the Constellation `Dialog` component to show a popup.
+            // For errors, you generally want to show some kind of error state or notification
+            // within your UI. If the problem is with the user's input, then use
+            // the error states of your smaller components (like the `TextField`s).
+            // If the problem is something we don't really control, such as network
+            // issues or an unexpected exception on the server side, then use a
+            // banner, modal, popup, or similar.
+            setErrorModalMessage(result.error);
+          }
+          setLoading(false);
+        })
+        .catch(setErrorModalMessage);
+    }
   };
 
   const formTitle = mode === "create" ? "New task" : "Edit task";
@@ -107,6 +142,15 @@ export function TaskForm({ mode, task, onSubmit }: TaskFormProps) {
           label="Description (optional)"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
+        />
+      </div>
+      <div className={styles.formRow}>
+        <TextField
+          className={`${styles.textField} ${styles.stretch}`}
+          data-testid="task-assignee-input"
+          label="Assignee (optional)"
+          value={assignee}
+          onChange={(event) => setAssignee(event.target.value)}
         />
         {/* set `type="primary"` on the button so the browser doesn't try to
         handle it specially (because it's inside a `<form>`) */}
