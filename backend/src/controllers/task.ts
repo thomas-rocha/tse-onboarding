@@ -63,7 +63,7 @@ export const createTask: RequestHandler = async (req, res, next) => {
       description,
       isChecked,
       dateCreated: Date.now(),
-      assignee,
+      assignee: assignee === "" ? undefined : assignee,
     });
 
     // Populate the assignee before sending response

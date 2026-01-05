@@ -106,7 +106,9 @@ export async function getAllTasks(): Promise<APIResult<Task[]>> {
     // your code here
     const response = await get("/api/tasks");
     const json = (await response.json()) as TaskJSON[];
-    const tasks: Task[] = json.map((element) => parseTask(element));
+    const tasks: Task[] = json
+      .map((element) => parseTask(element))
+      .sort((a, b) => b.dateCreated.getTime() - a.dateCreated.getTime());
     return { success: true, data: tasks };
   } catch (error) {
     return handleAPIError(error);
