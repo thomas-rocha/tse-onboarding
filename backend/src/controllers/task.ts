@@ -80,7 +80,6 @@ export const removeTask: RequestHandler = async (req, res, next) => {
 
   try {
     const result = await TaskModel.deleteOne({ _id: id });
-
     res.status(200).json(result);
   } catch (error) {
     next(error);
